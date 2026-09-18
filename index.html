@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>স্মার্ট পস - অ্যাডমিন প্যানেল</title>
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #0284c7; --primary-light: #e0f2fe; --success: #10b981;
+            --warning: #f59e0b; --danger: #ef4444; --bg: #f8fafc;
+            --card: #ffffff; --text-main: #0f172a; --text-muted: #64748b;
+            --border: #cbd5e1; --notice-bg: #8b5cf6;
+        }
+
+        * { box-sizing: border-box; font-family: 'Hind Siliguri', sans-serif; margin: 0; padding: 0; }
+        html, body { background: var(--bg); color: var(--text-main); font-size: 15px; overflow-x: hidden; width: 100%; }
+
+        /* Login */
+        #login-section { height: 100vh; display: flex; justify-content: center; align-items: center; padding: 15px; }
+        .login-box { background: var(--card); padding: 30px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.08); width: 100%; max-width: 380px; text-align: center; border: 1px solid var(--border); }
+        .login-box h2 { color: var(--primary); margin-bottom: 25px; font-weight: 700; }
+        .input-field { width: 100%; padding: 14px; margin-bottom: 15px; border: 1px solid var(--border); border-radius: 10px; font-size: 15px; outline: none; background: #f1f5f9; font-weight: 600; color: var(--text-main); }
+        .input-field:focus { border-color: var(--primary); background: #ffffff; }
+        .btn { width: 100%; padding: 14px; border: none; border-radius: 10px; font-weight: 700; font-size: 16px; cursor: pointer; color: white; background: var(--primary); transition: 0.3s; }
+        .btn:hover { background: #0369a1; }
+        
+        /* Dashboard Layout */
+        #dashboard-section { display: none; padding: 15px; max-width: 800px; margin: 0 auto; width: 100%; }
+        .header { display: flex; justify-content: space-between; align-items: center; background: var(--card); padding: 15px 20px; border-radius: 14px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); margin-bottom: 20px; border: 1px solid var(--border); }
+        .header h2 { color: var(--primary); font-weight: 700; font-size: 20px; margin: 0; }
+        .btn-logout { background: var(--danger); padding: 8px 15px; border-radius: 8px; border: none; color: white; cursor: pointer; font-weight: 700; font-size: 14px; }
+
+        /* Analytics Stats Grid */
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+        .stat-card { background: var(--card); padding: 20px 15px; border-radius: 14px; text-align: center; border: 1px solid var(--border); box-shadow: 0 4px 6px rgba(0,0,0,0.02); cursor: pointer; transition: 0.2s; }
+        .stat-card:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(0,0,0,0.05); }
+        .stat-card h3 { font-size: 13px; color: var(--text-muted); font-weight: 600; margin-bottom: 8px; pointer-events: none; }
+        .stat-card h2 { font-size: 26px; font-weight: 700; color: var(--text-main); margin: 0; pointer-events: none; }
+        .stat-income h2 { color: var(--primary); }
+        .stat-active h2 { color: var(--success); }
+        .stat-due h2 { color: var(--danger); }
+
+        /* Action & Search Bar */
+        .action-bar { display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px; }
+        @media(min-width: 600px) { .action-bar { flex-direction: row; } }
+        .search-box { position: relative; width: 100%; flex: 1; }
+        .search-input { width: 100%; padding: 12px 15px 12px 40px; border: 2px solid var(--border); border-radius: 10px; font-size: 15px; outline: none; transition: 0.3s; background: var(--card); }
+        .search-input:focus { border-color: var(--primary); }
+        .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 16px; }
+        
+        .top-btn-group { display: flex; gap: 8px; flex-wrap: wrap; }
+        .btn-add-new { background: var(--primary); color: white; border: none; padding: 12px 15px; border-radius: 10px; font-weight: 700; font-size: 14px; cursor: pointer; white-space: nowrap; box-shadow: 0 4px 10px rgba(2, 132, 199, 0.2); }
+        .btn-filter-review { background: var(--warning); color: #000; border: none; padding: 12px 15px; border-radius: 10px; font-weight: 700; font-size: 14px; cursor: pointer; white-space: nowrap; box-shadow: 0 4px 10px rgba(245, 158, 11, 0.2); }
+        .btn-filter-due { background: var(--danger); color: white; border: none; padding: 12px 15px; border-radius: 10px; font-weight: 700; font-size: 14px; cursor: pointer; white-space: nowrap; box-shadow: 0 4px 10px rgba(239, 68, 68, 0.2); }
+        
+        .broadcast-group { display: flex; gap: 10px; margin-bottom: 15px; }
+        .btn-broadcast { background: var(--notice-bg); color: white; border: none; padding: 12px 18px; border-radius: 10px; font-weight: 700; font-size: 14px; cursor: pointer; flex: 1; display: flex; justify-content: center; align-items: center; gap: 8px; box-shadow: 0 4px 10px rgba(139, 92, 246, 0.2); }
+        .btn-support-box { background: var(--warning); color: #000; border: none; padding: 12px 18px; border-radius: 10px; font-weight: 700; font-size: 14px; cursor: pointer; flex: 1; display: flex; justify-content: center; align-items: center; gap: 8px; box-shadow: 0 4px 10px rgba(245, 158, 11, 0.2); }
+
+        /* Shop List Container */
+        .card { background: var(--card); padding: 15px; border-radius: 14px; box-shadow: 0 4px 6px rgba(0,0,0,0.03); border: 1px solid var(--border); width: 100%; margin-bottom: 30px; }
+        #shopListContainer { min-height: 200px; max-height: 500px; overflow-y: auto; }
+        
+        .shop-list-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid #f1f5f9; cursor: pointer; transition: 0.2s; border-radius: 10px; }
+        .shop-list-item:hover { background: #f8fafc; }
+        .shop-list-item:last-child { border-bottom: none; }
+        .s-info h4 { margin: 0 0 4px 0; color: var(--text-main); font-size: 16px; font-weight: 700; }
+        .s-info p { margin: 0; font-size: 13px; color: var(--text-muted); font-weight: 600; }
+        
+        /* Badges */
+        .badge-active { background: #d1fae5; color: var(--success); padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; }
+        .badge-expired { background: #fee2e2; color: var(--danger); padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; }
+        .badge-review { background: #fef3c7; color: #b45309; padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; border: 1px solid #f59e0b; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
+        .badge-pending { background: #e2e8f0; color: #475569; padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; }
+
+        /* Premium Modals */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: center; z-index: 1000; padding: 15px; backdrop-filter: blur(5px); }
+        .modal-box { background: var(--card); padding: 30px 20px; border-radius: 20px; width: 100%; max-width: 400px; border: 1px solid var(--border); box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); animation: popIn 0.3s cubic-bezier(0.16, 1, 0.3, 1); position: relative; max-height: 90vh; overflow-y: auto; text-align: center; }
+        @keyframes popIn { 0% { transform: scale(0.9); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+        .modal-close { position: absolute; top: 15px; right: 15px; background: #f1f5f9; border: none; width: 32px; height: 32px; border-radius: 50%; font-size: 16px; cursor: pointer; color: var(--danger); font-weight: bold; display: flex; justify-content: center; align-items: center; }
+        .modal-box h3 { color: var(--primary); margin-bottom: 20px; font-size: 19px; font-weight: 700; border-bottom: 2px solid #f1f5f9; padding-bottom: 12px; text-align: center; }
+        .form-label { display: block; font-size: 13px; color: var(--text-muted); font-weight: 600; margin-bottom: 6px; text-align: left; }
+        
+        .detail-row { display: flex; justify-content: space-between; border-bottom: 1px dashed var(--border); padding: 10px 0; font-size: 14px; text-align: left; }
+        .detail-row:last-child { border-bottom: none; }
+        .detail-label { color: var(--text-muted); font-weight: 600; }
+        .detail-value { color: var(--text-main); font-weight: 700; text-align: right; }
+        
+        .action-btns-wrap { display: flex; gap: 10px; margin-top: 20px; }
+        .btn-action { border: none; padding: 12px; border-radius: 10px; font-weight: 700; font-size: 14px; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 6px; color: white; transition: 0.2s; }
+        .btn-action:hover { opacity: 0.9; }
+
+        .btn-sms { background: var(--notice-bg); color: white; border: none; padding: 12px; border-radius: 10px; font-weight: 700; font-size: 14px; cursor: pointer; width: 100%; margin-top: 10px; display: flex; justify-content: center; align-items: center; gap: 8px; }
+
+        /* Package Selector Styling */
+        .package-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 15px; }
+        .package-card { border: 2px solid var(--border); border-radius: 10px; padding: 10px 5px; text-align: center; cursor: pointer; transition: 0.2s; background: #fff; }
+        .package-card.selected { border-color: var(--primary); background: var(--primary-light); }
+        .package-card h4 { font-size: 14px; color: var(--text-main); margin-bottom: 2px; }
+        .package-card p { font-size: 11px; color: var(--text-muted); font-weight: 600; margin: 0; }
+
+        /* Custom Alert Popup */
+        #customAlert { z-index: 3000; }
+        .alert-box { background: #fff; padding: 25px 20px; border-radius: 18px; width: 100%; max-width: 320px; text-align: center; box-shadow: 0 15px 30px rgba(0,0,0,0.15); animation: popIn 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+        .alert-box h4 { font-size: 18px; margin-bottom: 10px; color: var(--text-main); }
+        .alert-box p { font-size: 14px; color: var(--text-muted); margin-bottom: 20px; font-weight: 500; }
+        
+        .modal-btns { display: flex; gap: 10px; justify-content: center; margin-top: 20px; }
+        .m-cancel { background: var(--border); color: var(--text-main); border: none; border-radius: 10px; font-weight: bold; padding: 12px; flex: 1; cursor: pointer; }
+        .m-confirm { background: var(--danger); color: white; border: none; border-radius: 10px; font-weight: bold; padding: 12px; flex: 1; cursor: pointer; }
+
+        .alert-icon { font-size: 45px; margin-bottom: 10px; display: inline-block; animation: bounceIn 0.5s ease; }
+        @keyframes bounceIn { 0% { transform: scale(0); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
+
+        .footer { text-align: center; margin-top: 10px; padding-bottom: 20px; color: var(--text-muted); font-size: 14px; font-weight: 600; }
+        #loader { display: none; text-align: center; padding: 20px; font-weight: bold; color: var(--primary); }
+    </style>
+</head>
+<body>
+
+    <!-- 🛡️ লগইন স্ক্রিন -->
+    <div id="login-section">
+        <div class="login-box">
+            <h2>🛡️ অ্যাডমিন প্যানেল</h2>
+            <input type="email" id="adminEmail" class="input-field" value="ourshop650@gmail.com" readonly>
+            <input type="password" id="adminPassword" class="input-field" value="AmiRajon44" readonly>
+            <button class="btn" id="loginBtn" onclick="window.loginAdmin()">লগইন করুন</button>
+        </div>
+    </div>
+
+    <!-- 📊 ড্যাশবোর্ড -->
+    <div id="dashboard-section">
+        <div class="header">
+            <h2>📊 স্মার্ট পস কন্ট্রোল</h2>
+            <button class="btn-logout" onclick="window.logoutAdmin()">লগআউট</button>
+        </div>
+
+        <!-- 📈 অ্যানালিটিক্স গ্রিড -->
+        <div class="stats-grid">
+            <div class="stat-card" onclick="window.filterAllShops()" title="সকল গ্রাহকের তালিকা দেখুন">
+                <h3>👥 মোট গ্রাহক</h3>
+                <h2 id="statTotal">০</h2>
+            </div>
+            <div class="stat-card stat-active" onclick="window.filterActiveShops()" title="অ্যাক্টিভ সদস্যদের তালিকা দেখুন">
+                <h3>✅ অ্যাক্টিভ সদস্য</h3>
+                <h2 id="statActive">০</h2>
+            </div>
+            <div class="stat-card stat-due" onclick="window.filterDueShops()" title="বাকিদের তালিকা দেখুন">
+                <h3>⏳ পেমেন্ট বাকি / মেয়াদ শেষ</h3>
+                <h2 id="statPending">০</h2>
+            </div>
+            <div class="stat-card stat-income" title="মোট সংগৃহীত আয়">
+                <h3>💰 মোট সংগৃহীত আয়</h3>
+                <h2 id="statIncome">০ ৳</h2>
+            </div>
+        </div>
+
+        <!-- 📢 ব্রডকাস্ট এবং সাপোর্ট বাটন গ্রুপ -->
+        <div class="broadcast-group">
+            <button class="btn-broadcast" onclick="window.openBroadcastModal()">
+                <span>📢 এসএমএস ব্রডকাস্ট</span>
+            </button>
+            <button class="btn-support-box" onclick="window.openSupportModal()">
+                <span>🛠️ সাপোর্ট টিকিট (<span id="supportCount">০</span>)</span>
+            </button>
+        </div>
+
+        <!-- 🔍 অ্যাকশন ও সার্চ -->
+        <div class="action-bar">
+            <div class="search-box">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="searchInput" class="search-input" placeholder="দোকানের নাম বা মোবাইল দিয়ে খুঁজুন..." onkeyup="window.filterShops()">
+            </div>
+            <div class="top-btn-group">
+                <button class="btn-filter-review" onclick="window.filterReviewShops()">🔔 রিভিউ (<span id="reviewCount">০</span>)</button>
+                <button class="btn-filter-due" onclick="window.filterDueShops()">⚠️ বাকি</button>
+                <button class="btn-add-new" onclick="document.getElementById('addShopModal').style.display='flex'">➕ নতুন</button>
+            </div>
+        </div>
+
+        <!-- 📋 গ্রাহক তালিকা -->
+        <div class="card">
+            <h3 style="margin-bottom: 10px; font-size: 16px; color: var(--text-main); font-weight: 700; padding: 0 5px; text-align: left;">📋 গ্রাহকদের তালিকা</h3>
+            <div id="loader">ডেটা লোড হচ্ছে...</div>
+            <div id="shopListContainer"></div>
+        </div>
+        
+        <div class="footer">Developed by: মোঃ রাজন হোসাইন</div>
+    </div>
+
+    <!-- 🛠️ সাপোর্ট টিকিট মোডাল (রিপ্লাই এবং ডিলিট বাটন সহ) -->
+    <div id="supportModal" class="modal-overlay">
+        <div class="modal-box" style="max-width: 500px;">
+            <button class="modal-close" onclick="document.getElementById('supportModal').style.display='none'">✖</button>
+            <h3>🛠️ সাপোর্ট মেসেজ</h3>
+            <div id="supportListContainer" style="max-height: 400px; overflow-y: auto;"></div>
+        </div>
+    </div>
+
+    <!-- 📢 ব্রডকাস্ট এসএমএস মোডাল -->
+    <div id="broadcastModal" class="modal-overlay">
+        <div class="modal-box">
+            <button class="modal-close" onclick="document.getElementById('broadcastModal').style.display='none'">✖</button>
+            <h3>📢 সবাইকে এসএমএস পাঠান</h3>
+            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 15px;">এখানে মেসেজ লিখে সেন্ড করলে তা সমস্ত দোকানদারের পস অ্যাপের নোটিশ বক্সে চলে যাবে।</p>
+            
+            <label class="form-label">এসএমএস-এর বার্তা (Message)</label>
+            <textarea id="broadcastMsg" class="input-field" style="height: 100px; resize: none;" placeholder="মাসিক ফি পরিশোধ করার অনুরোধ করা যাচ্ছে।">আসসালামু আলাইকুম, স্মার্ট পস সফটওয়্যারের মাসিক সাবস্ক্রিপশন ফি পরিশোধ করার জন্য অনুরোধ করা যাচ্ছে। ধন্যবাদ!</textarea>
+            
+            <button class="btn" style="background: var(--notice-bg); margin-top: 10px;" onclick="window.sendBroadcastSMS()">সবার ওয়ালে পাঠান</button>
+        </div>
+    </div>
+
+    <!-- ➕ অ্যাড শপ মোডাল -->
+    <div id="addShopModal" class="modal-overlay">
+        <div class="modal-box">
+            <button class="modal-close" onclick="document.getElementById('addShopModal').style.display='none'">✖</button>
+            <h3>➕ নতুন দোকান অ্যাকাউন্ট</h3>
+            <p style="font-size: 13px; color: var(--warning); font-weight: 600; margin-bottom: 15px; text-align: center;">গ্রাহক পেমেন্ট করার পর অ্যাডমিন অ্যাপ্রুভ করলে মেয়াদ শুরু হবে।</p>
+            
+            <label class="form-label">দোকানের নাম</label>
+            <input type="text" id="newShopName" class="input-field" placeholder="যেমন: বিসমিল্লাহ স্টোর">
+            <label class="form-label">লগইন ইমেইল</label>
+            <input type="email" id="newShopEmail" class="input-field" placeholder="shop@gmail.com">
+            <label class="form-label">লগইন পাসওয়ার্ড</label>
+            <input type="text" id="newShopPassword" class="input-field" placeholder="অন্তত ৬ অক্ষর">
+            <label class="form-label">মোবাইল নম্বর</label>
+            <input type="text" id="newShopPhone" class="input-field" placeholder="০১৭XXXXXXXX">
+            
+            <button class="btn" id="saveShopBtn" onclick="window.addShopData()" style="margin-top: 10px;">অ্যাকাউন্ট তৈরি করুন</button>
+        </div>
+    </div>
+
+    <!-- 👁️ শপ ডিটেইলস মোডাল -->
+    <div id="shopDetailsModal" class="modal-overlay">
+        <div class="modal-box">
+            <button class="modal-close" onclick="document.getElementById('shopDetailsModal').style.display='none'">✖</button>
+            <h3 id="det-shopName" style="margin-bottom: 10px; border-bottom: none;">দোকানের নাম</h3>
+            <div id="det-badge" style="text-align: center; margin-bottom: 15px;"></div>
+            
+            <div class="detail-row"><span class="detail-label">লগইন ইমেইল:</span><span class="detail-value" id="det-email"></span></div>
+            <div class="detail-row"><span class="detail-label">মোবাইল:</span><span class="detail-value" id="det-phone"></span></div>
+            <div class="detail-row"><span class="detail-label">বর্তমান মেয়াদ শেষ:</span><span class="detail-value" id="det-expire"></span></div>
+            
+            <div style="background: #f1f5f9; padding: 10px; border-radius: 8px; margin: 10px 0; border: 1px solid var(--border);">
+                <div style="font-size: 13px; color: var(--primary); font-weight: bold; margin-bottom: 8px; text-align: center; border-bottom: 1px dashed var(--border); padding-bottom: 5px;">পেমেন্ট সাবমিশন তথ্য</div>
+                <div class="detail-row"><span class="detail-label">পেমেন্ট মেথড:</span><span class="detail-value" id="det-pay-method" style="color:var(--text-main);"></span></div>
+                <div class="detail-row"><span class="detail-label">সেন্ডার নম্বর:</span><span class="detail-value" id="det-pay-num" style="color:var(--text-main);"></span></div>
+                <div class="detail-row"><span class="detail-label">কয় মাসের ফি:</span><span class="detail-value" id="det-pay-months" style="color:var(--success);"></span></div>
+                <div class="detail-row"><span class="detail-label">TrxID:</span><span class="detail-value" id="det-trx" style="color:var(--danger); font-size: 15px;"></span></div>
+            </div>
+
+            <div class="detail-row"><span class="detail-label">মোট পরিশোধিত মাস:</span><span class="detail-value" id="det-total-months" style="color:var(--success);">০ মাস</span></div>
+            <div class="detail-row"><span class="detail-label">দোকানের মোট সেলস:</span><span class="detail-value" id="det-sales-total" style="color:var(--primary);">০ ৳</span></div>
+
+            <div style="margin-top: 15px;">
+                <label class="form-label" style="color: var(--primary); font-weight: 700; text-align: center; margin-bottom: 8px;">সাবস্ক্রিপশন প্যাকেজ সিলেক্ট করুন</label>
+                <div class="package-grid">
+                    <div class="package-card selected" onclick="window.selectPackage(1, this)">
+                        <h4>১ মাস</h4>
+                        <p>১৫০ ৳</p>
+                    </div>
+                    <div class="package-card" onclick="window.selectPackage(6, this)">
+                        <h4>৬ মাস</h4>
+                        <p>৯০০ ৳</p>
+                    </div>
+                    <div class="package-card" onclick="window.selectPackage(12, this)">
+                        <h4>১ বছর</h4>
+                        <p>১৮০০ ৳</p>
+                    </div>
+                </div>
+                <input type="hidden" id="selectedMonths" value="1">
+            </div>
+
+            <button class="btn-sms" onclick="window.openIndividualSMSModalFromDetails()">
+                <span>💬 ব্যক্তিগত এসএমএস পাঠান</span>
+            </button>
+
+            <div class="action-btns-wrap">
+                <button class="btn-action" id="approveBtn" onclick="window.triggerApprovePaymentConfirm()" style="flex: 2; background: var(--success);">
+                    ✅ পেমেন্ট অ্যাপ্রুভ
+                </button>
+                <button class="btn-action" style="flex: 1; background: var(--danger);" onclick="window.requirePinToDelete()">
+                    🗑️ ডিলিট
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 💬 ব্যক্তিগত এসএমএস মোডাল (রিপ্লাই বক্স) -->
+    <div id="individualSMSModal" class="modal-overlay" style="z-index: 2500;">
+        <div class="modal-box">
+            <button class="modal-close" onclick="document.getElementById('individualSMSModal').style.display='none'">✖</button>
+            <h3>💬 মেসেজ / রিপ্লাই</h3>
+            <p id="smsTargetShop" style="font-size: 13px; color: var(--primary); font-weight: bold; margin-bottom: 15px; text-align: center;"></p>
+            
+            <label class="form-label">এসএমএস বার্তা</label>
+            <textarea id="individualMsg" class="input-field" style="height: 100px; resize: none;"></textarea>
+            
+            <button class="btn" style="background: var(--notice-bg); margin-top: 10px;" onclick="window.sendIndividualSMS()">এসএমএস পাঠান</button>
+        </div>
+    </div>
+
+    <!-- 🔒 ডিলিট পিন মোডাল -->
+    <div id="pinModal" class="modal-overlay" style="z-index: 2000;">
+        <div class="modal-box" style="max-width: 320px; text-align: center;">
+            <h3 style="color: var(--danger); border-bottom: none; font-size: 20px;">সিকিউরিটি পিন</h3>
+            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 15px;">গ্রাহক ডিলিট করতে পিন দিন<br><strong style="color:var(--primary);">(ডিফল্ট পিন: 1234)</strong></p>
+            
+            <input type="password" id="adminPin" class="input-field" placeholder="****" maxlength="4" style="text-align: center; font-size: 24px; letter-spacing: 12px; margin-bottom: 5px;">
+            
+            <div style="display: flex; gap: 10px; margin-top: 15px;">
+                <button class="btn" style="background: var(--border); color: var(--text-main); flex: 1;" onclick="document.getElementById('pinModal').style.display='none'">বাতিল</button>
+                <button class="btn" style="background: var(--danger); flex: 1;" onclick="window.executeDelete()">নিশ্চিত</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ❓ সুন্দর কাস্টম কনফার্ম মোডাল (To Replace Ugly JS confirm) -->
+    <div class="modal-overlay top-tier" id="adminConfirmModal" style="z-index: 9999;">
+        <div class="modal-box" style="padding: 30px 20px;">
+            <div class="alert-icon" id="confirmIcon" style="color: var(--danger);">❓</div>
+            <h3 id="confirmModalTitle" style="color:var(--text-main); font-size: 20px;">নিশ্চিত করুন</h3>
+            <p id="confirmModalMessage" style="color:var(--text-muted); font-size: 15px; margin-bottom: 25px; font-weight: 500;">আপনি কি নিশ্চিত?</p>
+            <div class="modal-btns">
+                <button class="m-cancel" onclick="document.getElementById('adminConfirmModal').style.display='none'">বাতিল</button>
+                <button class="m-confirm" id="adminConfirmActionBtn" onclick="window.executeConfirmAction()">নিশ্চিত</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 💬 কাস্টম অ্যালার্ট মোডাল -->
+    <div id="customAlert" class="modal-overlay" style="z-index: 9999;">
+        <div class="alert-box">
+            <h4 id="alertTitle">সতর্কবার্তা</h4>
+            <p id="alertMessage">মেসেজ এখানে থাকবে</p>
+            <button class="btn" onclick="document.getElementById('customAlert').style.display='none'">ঠিক আছে</button>
+        </div>
+    </div>
+
+    <!-- 🔥 Firebase v10 Modular SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-auth.js";
+        import { getDatabase, ref, push, set, onValue, update, remove } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAGdkgmzKG7lY9Y6BLfGyx0uB3qU3n_VAc",
+            authDomain: "my-shop-5c6a4.firebaseapp.com",
+            projectId: "my-shop-5c6a4",
+            storageBucket: "my-shop-5c6a4.firebasestorage.app",
+            messagingSenderId: "519610506657",
+            appId: "1:519610506657:web:36f5e36c8ba7114e377fe0",
+            measurementId: "G-8TSJT2MLVD"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
+        const secondaryApp = initializeApp(firebaseConfig, "SecondaryApp");
+        const secondaryAuth = getAuth(secondaryApp);
+
+        let allShopsData = []; 
+        let activeShopIdForAction = null;
+        let activeShopExpireForAction = null;
+        let activeShopNameForAction = null;
+        let allSupportTickets = [];
+
+        window.showAlert = (title, message) => {
+            document.getElementById('alertTitle').innerText = title;
+            document.getElementById('alertMessage').innerText = message;
+            document.getElementById('customAlert').style.display = 'flex';
+        };
+
+        // ================== BEAUTIFUL CUSTOM CONFIRM FUNCTION ==================
+        let confirmCallbackFn = null;
+        window.showCustomConfirm = (title, message, icon, btnText, btnColor, callback) => {
+            document.getElementById('confirmModalTitle').innerText = title;
+            document.getElementById('confirmModalMessage').innerText = message;
+            document.getElementById('confirmIcon').innerText = icon || '❓';
+            document.getElementById('confirmIcon').style.color = btnColor || 'var(--primary)';
+            
+            const actionBtn = document.getElementById('adminConfirmActionBtn');
+            actionBtn.innerText = btnText || 'নিশ্চিত';
+            actionBtn.style.background = btnColor || 'var(--primary)';
+            
+            confirmCallbackFn = callback;
+            document.getElementById('adminConfirmModal').style.display = 'flex';
+        };
+
+        window.executeConfirmAction = () => {
+            document.getElementById('adminConfirmModal').style.display = 'none';
+            if (confirmCallbackFn) confirmCallbackFn();
+        };
+        // =======================================================================
+
+        const toBengaliNum = (num) => {
+            const engToBan = {'0':'০','1':'১','2':'২','3':'৩','4':'৪','5':'৫','6':'৬','7':'৭','8':'৮','9':'৯'};
+            return num.toString().split('').map(char => engToBan[char] || char).join('');
+        };
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                document.getElementById('login-section').style.display = 'none';
+                document.getElementById('dashboard-section').style.display = 'block';
+                window.loadShops();
+                window.loadSupportTickets();
+            } else {
+                document.getElementById('login-section').style.display = 'flex';
+                document.getElementById('dashboard-section').style.display = 'none';
+            }
+        });
+
+        window.loginAdmin = async () => {
+            const email = document.getElementById('adminEmail').value;
+            const password = document.getElementById('adminPassword').value;
+            const btn = document.getElementById('loginBtn');
+
+            btn.innerText = "লগইন হচ্ছে...";
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+                btn.innerText = "লগইন করুন";
+            } catch (error) {
+                window.showAlert("লগইন ফেইল", "ফায়ারবেস এরর: " + error.code);
+                btn.innerText = "লগইন করুন";
+            }
+        };
+
+        window.logoutAdmin = () => signOut(auth);
+
+        window.selectPackage = (months, element) => {
+            document.querySelectorAll('.package-card').forEach(card => card.classList.remove('selected'));
+            element.classList.add('selected');
+            document.getElementById('selectedMonths').value = months;
+        };
+
+        window.addShopData = async () => {
+            const name = document.getElementById('newShopName').value.trim();
+            const email = document.getElementById('newShopEmail').value.trim();
+            const password = document.getElementById('newShopPassword').value.trim();
+            const phone = document.getElementById('newShopPhone').value.trim();
+            const btn = document.getElementById('saveShopBtn');
+
+            if(!name || !email || !password) { window.showAlert("তথ্য অসম্পূর্ণ", "নাম, ইমেইল এবং পাসওয়ার্ড দিতে হবে!"); return; }
+            if(password.length < 6) { window.showAlert("ত্রুটি", "পাসওয়ার্ড অন্তত ৬ অক্ষরের হতে হবে!"); return; }
+
+            btn.innerText = "অ্যাকাউন্ট তৈরি হচ্ছে...";
+            try {
+                await createUserWithEmailAndPassword(secondaryAuth, email, password);
+                await signOut(secondaryAuth);
+
+                const shopListRef = ref(db, 'shops');
+                const newShopRef = push(shopListRef);
+                
+                await set(newShopRef, {
+                    shopName: name, email: email, phone: phone, expireDate: "", paidMonths: 0, paymentStatus: 'pending', trxId: "", totalSales: 0, createdAt: new Date().toISOString()
+                });
+                
+                window.showAlert("সফল", "নতুন দোকান ও অ্যাকাউন্ট সফলভাবে তৈরি হয়েছে!");
+                
+                document.getElementById('newShopName').value = ''; document.getElementById('newShopEmail').value = '';
+                document.getElementById('newShopPassword').value = ''; document.getElementById('newShopPhone').value = '';
+                btn.innerText = "অ্যাকাউন্ট তৈরি করুন"; 
+                document.getElementById('addShopModal').style.display='none';
+            } catch (error) { 
+                let msg = error.message;
+                if(error.code === 'auth/email-already-in-use') msg = 'এই ইমেইল দিয়ে আগেই অ্যাকাউন্ট খোলা আছে!';
+                window.showAlert("সমস্যা হয়েছে", msg); 
+                btn.innerText = "অ্যাকাউন্ট তৈরি করুন"; 
+            }
+        };
+
+        window.loadShops = () => {
+            const loader = document.getElementById('loader');
+            loader.style.display = 'block';
+            const shopsRef = ref(db, 'shops');
+            
+            onValue(shopsRef, (snapshot) => {
+                loader.style.display = 'none';
+                allShopsData = [];
+                
+                let totalCount = 0;
+                let activeCount = 0;
+                let pendingCount = 0;
+                let reviewCount = 0;
+                let dueCount = 0;
+                let totalIncomeMonths = 0;
+
+                const today = new Date().toISOString().split('T')[0];
+
+                if (snapshot.exists()) { 
+                    snapshot.forEach((childSnapshot) => {
+                        const data = childSnapshot.val();
+                        allShopsData.push({ id: childSnapshot.key, ...data });
+                        
+                        totalCount++;
+                        const isExpired = data.expireDate && data.expireDate < today;
+
+                        // 인কাম ক্যালকুলেশন
+                        totalIncomeMonths += parseInt(data.paidMonths || 0);
+
+                        if (data.paymentStatus === 'review') {
+                            reviewCount++;
+                        }
+
+                        if (data.paymentStatus === 'active' && !isExpired) {
+                            activeCount++;
+                        } else {
+                            pendingCount++;
+                            dueCount++;
+                        }
+                    });
+                    
+                    allShopsData.sort((a, b) => {
+                        if (a.paymentStatus === 'review' && b.paymentStatus !== 'review') return -1;
+                        if (a.paymentStatus !== 'review' && b.paymentStatus === 'review') return 1;
+                        return b.createdAt.localeCompare(a.createdAt);
+                    });
+                }
+                
+                document.getElementById('statTotal').innerText = toBengaliNum(totalCount);
+                document.getElementById('statActive').innerText = toBengaliNum(activeCount);
+                document.getElementById('statPending').innerText = toBengaliNum(pendingCount);
+                document.getElementById('reviewCount').innerText = toBengaliNum(reviewCount);
+                document.getElementById('dueCount').innerText = toBengaliNum(dueCount);
+                
+                // ১৫০ টাকা মাসিক ফি হিসেবে মোট আয় 
+                document.getElementById('statIncome').innerText = toBengaliNum(totalIncomeMonths * 150) + " ৳";
+
+                window.renderList(allShopsData);
+            });
+        };
+
+        window.filterAllShops = () => { window.renderList(allShopsData); };
+
+        window.filterActiveShops = () => {
+            const today = new Date().toISOString().split('T')[0];
+            const activeData = allShopsData.filter(shop => shop.paymentStatus === 'active' && (!shop.expireDate || shop.expireDate >= today));
+            window.renderList(activeData);
+        };
+
+        window.filterDueShops = () => {
+            const today = new Date().toISOString().split('T')[0];
+            const dueData = allShopsData.filter(shop => !shop.expireDate || shop.expireDate < today || shop.paymentStatus === 'pending');
+            window.renderList(dueData);
+        };
+
+        window.loadSupportTickets = () => {
+            const supportRef = ref(db, 'supportTickets');
+            onValue(supportRef, (snapshot) => {
+                allSupportTickets = [];
+                if (snapshot.exists()) {
+                    snapshot.forEach((childSnapshot) => {
+                        allSupportTickets.push({ id: childSnapshot.key, ...childSnapshot.val() });
+                    });
+                }
+                document.getElementById('supportCount').innerText = toBengaliNum(allSupportTickets.length);
+                
+                if(document.getElementById('supportModal').style.display === 'flex') {
+                    window.openSupportModal();
+                }
+            });
+        };
+
+        window.openSupportModal = () => {
+            const container = document.getElementById('supportListContainer');
+            container.innerHTML = '';
+
+            if (allSupportTickets.length === 0) {
+                container.innerHTML = `<div style="text-align:center; padding: 20px; color:gray;">কোনো সাপোর্ট টিকিট নেই।</div>`;
+            } else {
+                allSupportTickets.slice().reverse().forEach(ticket => {
+                    const matchedShop = allShopsData.find(s => s.email === ticket.email);
+                    const shopId = matchedShop ? matchedShop.id : null;
+                    
+                    let replyBtnHtml = '';
+                    if (shopId) {
+                        replyBtnHtml = `<button onclick="window.replyToTicket('${shopId}', '${ticket.shopName}')" style="background:var(--success); color:white; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-size:12px; font-weight:bold; transition:0.2s; margin-right: 8px;">💬 রিপ্লাই</button>`;
+                    } else {
+                        replyBtnHtml = `<span style="font-size:11px; color:var(--danger); margin-right:8px; font-weight:bold;">(গ্রাহক নেই)</span>`;
+                    }
+
+                    const div = document.createElement('div');
+                    div.style.cssText = "background: #f8fafc; padding: 15px; border-radius: 12px; margin-bottom: 12px; border: 1px solid var(--border); text-align: left; box-shadow: 0 2px 5px rgba(0,0,0,0.02);";
+                    div.innerHTML = `
+                        <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                            <strong style="color:var(--primary); font-size:16px;">${ticket.shopName || 'দোকান'}</strong>
+                            <div>
+                                ${replyBtnHtml}
+                                <button onclick="window.triggerDeleteSupportTicket('${ticket.id}')" style="background:var(--danger); color:white; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-size:12px; font-weight:bold; transition:0.2s;">🗑️ ডিলিট</button>
+                            </div>
+                        </div>
+                        <p style="font-size: 14px; margin: 8px 0; color:var(--text-main); font-weight:500;">${ticket.message}</p>
+                        <small style="color:var(--text-muted); font-weight:600;">${new Date(ticket.timestamp).toLocaleString('bn-BD')}</small>
+                    `;
+                    container.appendChild(div);
+                });
+            }
+            document.getElementById('supportModal').style.display = 'flex';
+        };
+
+        window.replyToTicket = (shopId, shopName) => {
+            activeShopIdForAction = shopId;
+            activeShopNameForAction = shopName;
+            
+            document.getElementById('supportModal').style.display = 'none';
+            document.getElementById('smsTargetShop').innerText = `প্রাপক: ${shopName}`;
+            document.getElementById('individualMsg').value = '';
+            document.getElementById('individualSMSModal').style.display = 'flex';
+        };
+
+        // Changed to use Custom Confirm Modal
+        window.triggerDeleteSupportTicket = (ticketId) => {
+            window.showCustomConfirm(
+                "মেসেজ ডিলিট",
+                "আপনি কি নিশ্চিত যে এই মেসেজটি চিরতরে মুছে ফেলতে চান?",
+                "🗑️", "মুছে ফেলুন", "var(--danger)",
+                async () => {
+                    try {
+                        await remove(ref(db, 'supportTickets/' + ticketId));
+                        window.showAlert("সফল", "সাপোর্ট মেসেজটি ডিলিট করা হয়েছে।");
+                    } catch(error) {
+                        window.showAlert("ত্রুটি", "ডিলিট করতে সমস্যা হয়েছে: " + error.message);
+                    }
+                }
+            );
+        };
+
+        window.renderList = (dataArray) => {
+            const container = document.getElementById('shopListContainer');
+            container.innerHTML = '';
+            
+            if(dataArray.length === 0) {
+                container.innerHTML = `<div style="text-align:center; padding: 20px; color:gray; font-size: 14px; font-weight: 600;">কোনো গ্রাহক পাওয়া যায়নি।</div>`;
+                return;
+            }
+
+            const today = new Date().toISOString().split('T')[0];
+
+            dataArray.forEach((data) => {
+                const isExpired = data.expireDate && data.expireDate < today;
+                let statusBadge = '';
+
+                if(data.paymentStatus === 'review') {
+                    statusBadge = `<span class="badge-review">🔔 পেমেন্ট রিভিউ</span>`;
+                } else if(data.paymentStatus === 'pending' || !data.expireDate) {
+                    statusBadge = `<span class="badge-pending">অপেক্ষায় আছে</span>`;
+                } else if(isExpired) {
+                    statusBadge = `<span class="badge-expired">❌ মেয়াদ শেষ</span>`;
+                } else {
+                    statusBadge = `<span class="badge-active">✅ অ্যাক্টিভ</span>`;
+                }
+
+                const item = document.createElement('div');
+                item.className = 'shop-list-item';
+                item.onclick = () => window.openShopDetails(data.id);
+                item.innerHTML = `
+                    <div class="s-info">
+                        <h4>${data.shopName}</h4>
+                        <p>${data.phone || data.email}</p>
+                    </div>
+                    <div>${statusBadge}</div>
+                `;
+                container.appendChild(item);
+            });
+        };
+
+        window.filterShops = () => {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const filteredData = allShopsData.filter(shop => 
+                (shop.shopName && shop.shopName.toLowerCase().includes(query)) ||
+                (shop.email && shop.email.toLowerCase().includes(query)) ||
+                (shop.phone && shop.phone.includes(query))
+            );
+            window.renderList(filteredData);
+        };
+
+        window.filterReviewShops = () => {
+            const reviewData = allShopsData.filter(shop => shop.paymentStatus === 'review');
+            window.renderList(reviewData);
+        };
+
+        window.openShopDetails = (id) => {
+            const shop = allShopsData.find(s => s.id === id);
+            if(!shop) return;
+            
+            activeShopIdForAction = id;
+            activeShopExpireForAction = shop.expireDate;
+            activeShopNameForAction = shop.shopName;
+
+            document.getElementById('det-shopName').innerText = shop.shopName;
+            document.getElementById('det-email').innerText = shop.email;
+            document.getElementById('det-phone').innerText = shop.phone || 'দেওয়া হয়নি';
+            
+            document.getElementById('det-pay-method').innerText = shop.payMethod === 'bKash' ? 'বিকাশ' : (shop.payMethod === 'Nagad' ? 'নগদ' : '-');
+            document.getElementById('det-pay-num').innerText = shop.sentNumber ? toBengaliNum(shop.sentNumber) : '-';
+            document.getElementById('det-pay-months').innerText = shop.payMonths ? toBengaliNum(shop.payMonths) + ' মাস' : '-';
+            document.getElementById('det-trx').innerText = shop.trxId ? shop.trxId : 'নতুন কোনো TrxID নেই';
+            
+            document.getElementById('det-total-months').innerText = toBengaliNum(shop.paidMonths || 0) + ' মাস';
+            document.getElementById('det-sales-total').innerText = toBengaliNum(shop.totalSales || 0) + ' ৳';
+            
+            let requestedMonths = parseInt(shop.payMonths) || 1;
+            let cards = document.querySelectorAll('.package-card');
+            if(requestedMonths === 6) window.selectPackage(6, cards[1]);
+            else if(requestedMonths === 12) window.selectPackage(12, cards[2]);
+            else { window.selectPackage(1, cards[0]); document.getElementById('selectedMonths').value = requestedMonths; }
+
+            const today = new Date().toISOString().split('T')[0];
+            const isExpired = shop.expireDate && shop.expireDate < today;
+            
+            if (!shop.expireDate) {
+                document.getElementById('det-expire').innerHTML = `<span style="color:gray;">এখনো শুরু হয়নি</span>`;
+            } else {
+                document.getElementById('det-expire').innerHTML = isExpired ? 
+                    `<span style="color:var(--danger);">${shop.expireDate} (মেয়াদ শেষ)</span>` : 
+                    `<span style="color:var(--success);">${shop.expireDate}</span>`;
+            }
+
+            let badgeHtml = '';
+            const approveBtn = document.getElementById('approveBtn');
+
+            if(shop.paymentStatus === 'review') {
+                badgeHtml = `<span class="badge-review" style="font-size:14px; padding: 6px 15px;">🔔 নতুন পেমেন্ট রিভিউ এসেছে</span>`;
+                approveBtn.innerHTML = `✅ পেমেন্ট অ্যাপ্রুভ করুন`;
+                approveBtn.style.background = 'var(--success)';
+            } else {
+                if(shop.paymentStatus === 'pending' || !shop.expireDate) {
+                    badgeHtml = `<span class="badge-pending" style="font-size:14px; padding: 6px 15px;">পেমেন্ট বাকি / অপেক্ষমাণ</span>`;
+                } else if(isExpired) {
+                    badgeHtml = `<span class="badge-expired" style="font-size:14px; padding: 6px 15px;">❌ মেয়াদ শেষ হয়েছে</span>`;
+                } else {
+                    badgeHtml = `<span class="badge-active" style="font-size:14px; padding: 6px 15px;">✅ অ্যাকাউন্ট অ্যাক্টিভ</span>`;
+                }
+                approveBtn.innerHTML = `➕ ম্যানুয়ালি মেয়াদ বাড়ান`;
+                approveBtn.style.background = 'var(--primary)';
+            }
+            
+            document.getElementById('det-badge').innerHTML = badgeHtml;
+            document.getElementById('shopDetailsModal').style.display = 'flex';
+        };
+
+        window.openBroadcastModal = () => {
+            document.getElementById('broadcastModal').style.display = 'flex';
+        };
+
+        // Changed to use Custom Confirm Modal
+        window.sendBroadcastSMS = () => {
+            const baseMsg = document.getElementById('broadcastMsg').value.trim();
+            if(!baseMsg) { window.showAlert("খালি মেসেজ", "দয়া করে এসএমএস-এর বার্তা লিখুন!"); return; }
+
+            window.showCustomConfirm(
+                "এসএমএস ব্রডকাস্ট",
+                "আপনি কি নিশ্চিত যে এই এসএমএসটি সকল দোকানদারের ওয়ালে পাঠাতে চান?",
+                "📢", "পাঠান", "var(--notice-bg)",
+                async () => {
+                    const finalMsg = baseMsg + "\n\n[বার্তাটি পাঠানো হয়েছে: " + new Date().toLocaleString('bn-BD') + "]";
+                    try {
+                        const noticeRef = ref(db, 'systemNotice');
+                        await set(noticeRef, {
+                            message: finalMsg,
+                            timestamp: new Date().toISOString()
+                        });
+
+                        document.getElementById('broadcastModal').style.display = 'none';
+                        window.showAlert("সফল", "ইন্টারনাল এসএমএস সফলভাবে সকল গ্রাহকের ওয়ালে পাঠিয়ে দেওয়া হয়েছে!");
+                    } catch (error) {
+                        window.showAlert("ত্রুটি", "এসএমএস পাঠাতে সমস্যা হয়েছে: " + error.message);
+                    }
+                }
+            );
+        };
+
+        window.openIndividualSMSModalFromDetails = () => {
+            document.getElementById('smsTargetShop').innerText = `প্রাপক: ${activeShopNameForAction}`;
+            document.getElementById('individualMsg').value = `আসসালামু আলাইকুম ${activeShopNameForAction}, আপনার পস সফটওয়্যারের সাবস্ক্রিপশন ফি পরিশোধ করার জন্য অনুরোধ করা যাচ্ছে।`;
+            document.getElementById('individualSMSModal').style.display = 'flex';
+        };
+
+        window.sendIndividualSMS = async () => {
+            const msg = document.getElementById('individualMsg').value.trim();
+            if(!msg) { window.showAlert("খালি মেসেজ", "দয়া করে বার্তা লিখুন!"); return; }
+
+            try {
+                const personalNoticeRef = ref(db, `shops/${activeShopIdForAction}/personalNotice`);
+                await set(personalNoticeRef, {
+                    message: msg,
+                    timestamp: new Date().toISOString()
+                });
+
+                document.getElementById('individualSMSModal').style.display = 'none';
+                document.getElementById('shopDetailsModal').style.display = 'none';
+                window.showAlert("সফল", `${activeShopNameForAction}-এর ওয়ালে ব্যক্তিগত এসএমএস পাঠানো হয়েছে!`);
+            } catch (error) {
+                window.showAlert("ত্রুটি", "এসএমএস পাঠাতে সমস্যা হয়েছে: " + error.message);
+            }
+        };
+
+        // Changed to use Custom Confirm Modal
+        window.triggerApprovePaymentConfirm = () => {
+            const monthsInput = parseInt(document.getElementById('selectedMonths').value) || 1;
+            
+            window.showCustomConfirm(
+                "মেয়াদ বৃদ্ধি",
+                `আপনি কি নিশ্চিত যে এই গ্রাহকের মেয়াদ আরও ${toBengaliNum(monthsInput)} মাস বাড়াতে চান?`,
+                "✅", "অ্যাপ্রুভ", "var(--success)",
+                window.approvePayment
+            );
+        };
+
+        window.approvePayment = async () => {
+            const monthsInput = parseInt(document.getElementById('selectedMonths').value) || 1;
+            
+            try {
+                let dateObj;
+                const todayObj = new Date();
+
+                if (!activeShopExpireForAction || new Date(activeShopExpireForAction) < todayObj) {
+                    dateObj = todayObj;
+                } else {
+                    dateObj = new Date(activeShopExpireForAction);
+                }
+                
+                dateObj.setMonth(dateObj.getMonth() + monthsInput);
+                const newExpireDate = dateObj.toISOString().split('T')[0];
+                
+                const currentShop = allShopsData.find(s => s.id === activeShopIdForAction);
+                const existingMonths = (currentShop && currentShop.expireDate && new Date(currentShop.expireDate) >= todayObj) ? (parseInt(currentShop.paidMonths) || 0) : 0;
+                const totalPaidMonths = existingMonths + monthsInput;
+
+                await update(ref(db, 'shops/' + activeShopIdForAction), { 
+                    expireDate: newExpireDate,
+                    paidMonths: totalPaidMonths,
+                    paymentStatus: 'active',
+                    warningStatus: 'normal',
+                    trxId: null,
+                    sentNumber: null,
+                    payMethod: null,
+                    payMonths: null 
+                });
+                
+                window.showAlert("সফল", `মেয়াদ সফলভাবে ${monthsInput} মাস বাড়িয়ে ${newExpireDate} পর্যন্ত করা হয়েছে!`); 
+                document.getElementById('shopDetailsModal').style.display = 'none';
+            } catch (error) { window.showAlert("ত্রুটি", "আপডেট ফেইল: " + error.message); }
+        };
+
+        window.requirePinToDelete = () => {
+            document.getElementById('adminPin').value = '';
+            document.getElementById('pinModal').style.display = 'flex';
+        };
+
+        window.executeDelete = async () => {
+            const pin = document.getElementById('adminPin').value;
+            if (pin !== '1234') {
+                window.showAlert("ভুল পিন", "সঠিক পিন (1234) দিন।");
+                return;
+            }
+            
+            try {
+                await remove(ref(db, 'shops/' + activeShopIdForAction));
+                window.showAlert("সফল", "গ্রাহককে সফলভাবে সিস্টেম থেকে মুছে ফেলা হয়েছে!"); 
+                document.getElementById('pinModal').style.display = 'none';
+                document.getElementById('shopDetailsModal').style.display = 'none';
+            } catch (error) {
+                window.showAlert("ত্রুটি", "ডিলিট ফেইল: " + error.message);
+            }
+        };
+    </script>
+</body>
+</html>

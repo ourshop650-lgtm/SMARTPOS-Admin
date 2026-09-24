@@ -52,6 +52,7 @@
         
         .top-btn-group { display: flex; gap: 8px; flex-wrap: wrap; }
         .btn-add-new { background: var(--primary); color: white; border: none; padding: 12px 15px; border-radius: 10px; font-weight: 700; font-size: 14px; cursor: pointer; white-space: nowrap; box-shadow: 0 4px 10px rgba(2, 132, 199, 0.2); }
+        .btn-add-product { background: var(--success); color: white; border: none; padding: 12px 15px; border-radius: 10px; font-weight: 700; font-size: 14px; cursor: pointer; white-space: nowrap; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.2); }
         .btn-filter-review { background: var(--warning); color: #000; border: none; padding: 12px 15px; border-radius: 10px; font-weight: 700; font-size: 14px; cursor: pointer; white-space: nowrap; box-shadow: 0 4px 10px rgba(245, 158, 11, 0.2); }
         .btn-filter-due { background: var(--danger); color: white; border: none; padding: 12px 15px; border-radius: 10px; font-weight: 700; font-size: 14px; cursor: pointer; white-space: nowrap; box-shadow: 0 4px 10px rgba(239, 68, 68, 0.2); }
         
@@ -125,8 +126,9 @@
     <div id="login-section">
         <div class="login-box">
             <h2>🛡️ অ্যাডমিন প্যানেল</h2>
-            <input type="email" id="adminEmail" class="input-field" value="ourshop650@gmail.com" readonly>
-            <input type="password" id="adminPassword" class="input-field" value="AmiRajon44" readonly>
+            <!-- সতর্কতা: লাইভ সার্ভারে অবশ্যই হার্ডকোড করা পাসওয়ার্ড সরিয়ে দেবেন -->
+            <input type="email" id="adminEmail" class="input-field" value="ourshop650@gmail.com">
+            <input type="password" id="adminPassword" class="input-field" value="AmiRajon44">
             <button class="btn" id="loginBtn" onclick="window.loginAdmin()">লগইন করুন</button>
         </div>
     </div>
@@ -149,11 +151,11 @@
                 <h2 id="statActive">০</h2>
             </div>
             <div class="stat-card stat-due" onclick="window.filterDueShops()" title="বাকিদের তালিকা দেখুন">
-                <h3>⏳ পেমেন্ট বাকি / মেয়াদ শেষ</h3>
+                <h3>⏳ পেমেন্ট বাকি / মেয়াদ শেষ</h3>
                 <h2 id="statPending">০</h2>
             </div>
-            <div class="stat-card stat-income" title="মোট সংগৃহীত আয়">
-                <h3>💰 মোট সংগৃহীত আয়</h3>
+            <div class="stat-card stat-income" title="মোট সংগৃহীত আয়">
+                <h3>💰 মোট সংগৃহীত আয়</h3>
                 <h2 id="statIncome">০ ৳</h2>
             </div>
         </div>
@@ -172,12 +174,14 @@
         <div class="action-bar">
             <div class="search-box">
                 <span class="search-icon">🔍</span>
-                <input type="text" id="searchInput" class="search-input" placeholder="দোকানের নাম বা মোবাইল দিয়ে খুঁজুন..." onkeyup="window.filterShops()">
+                <input type="text" id="searchInput" class="search-input" placeholder="দোকানের নাম বা মোবাইল দিয়ে খুঁজুন..." onkeyup="window.filterShops()">
             </div>
             <div class="top-btn-group">
                 <button class="btn-filter-review" onclick="window.filterReviewShops()">🔔 রিভিউ (<span id="reviewCount">০</span>)</button>
                 <button class="btn-filter-due" onclick="window.filterDueShops()">⚠️ বাকি</button>
                 <button class="btn-add-new" onclick="document.getElementById('addShopModal').style.display='flex'">➕ নতুন</button>
+                <!-- নতুন পণ্য যুক্ত করার বাটন -->
+                <button class="btn-add-product" onclick="window.openAddProductModal()">📦 পণ্য যুক্ত</button>
             </div>
         </div>
 
@@ -191,7 +195,33 @@
         <div class="footer">Developed by: মোঃ রাজন হোসাইন</div>
     </div>
 
-    <!-- 🛠️ সাপোর্ট টিকিট মোডাল (রিপ্লাই এবং ডিলিট বাটন সহ) -->
+    <!-- 📦 নতুন পণ্য যুক্ত মোডাল (Global Products) -->
+    <div id="addProductModal" class="modal-overlay">
+        <div class="modal-box">
+            <button class="modal-close" onclick="document.getElementById('addProductModal').style.display='none'">✖</button>
+            <h3>📦 গ্লোবাল পণ্য যুক্ত করুন</h3>
+            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 15px;">একসাথে সর্বোচ্চ ১০০০টি পণ্য যুক্ত করতে পারবেন (প্রতি লাইনে একটি করে পণ্যের নাম লিখুন)। আগে থেকে ডেটাবেসে থাকলে সেটি স্বয়ংক্রিয়ভাবে বাদ যাবে।</p>
+            
+            <label class="form-label">পণ্যের একক (Unit)</label>
+            <select id="newProductUnit" class="input-field" style="padding: 10px; cursor: pointer;">
+                <option value="পিস">পিস (Piece)</option>
+                <option value="কেজি">কেজি (KG)</option>
+                <option value="লিটার">লিটার (Liter)</option>
+                <option value="গ্রাম">গ্রাম (Gram)</option>
+                <option value="প্যাকেট">প্যাকেট (Packet)</option>
+                <option value="বক্স">বক্স (Box)</option>
+                <option value="ডজন">ডজন (Dozen)</option>
+                <option value="ব্যাগ">ব্যাগ (Bag)</option>
+            </select>
+
+            <label class="form-label">পণ্যের নাম (Product Names)</label>
+            <textarea id="newProductNames" class="input-field" style="height: 150px; resize: none; font-weight: 500;" placeholder="যেমন:&#10;ম্যাগি নুডলস&#10;প্রাণ ম্যাংগো জুস&#10;চিনি"></textarea>
+            
+            <button class="btn" id="saveProductBtn" onclick="window.saveGlobalProducts()" style="margin-top: 10px; background: var(--success);">পণ্যগুলো সেভ করুন</button>
+        </div>
+    </div>
+
+    <!-- 🛠️ সাপোর্ট টিকিট মোডাল -->
     <div id="supportModal" class="modal-overlay">
         <div class="modal-box" style="max-width: 500px;">
             <button class="modal-close" onclick="document.getElementById('supportModal').style.display='none'">✖</button>
@@ -208,9 +238,9 @@
             <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 15px;">এখানে মেসেজ লিখে সেন্ড করলে তা সমস্ত দোকানদারের পস অ্যাপের নোটিশ বক্সে চলে যাবে।</p>
             
             <label class="form-label">এসএমএস-এর বার্তা (Message)</label>
-            <textarea id="broadcastMsg" class="input-field" style="height: 100px; resize: none;" placeholder="মাসিক ফি পরিশোধ করার অনুরোধ করা যাচ্ছে।">আসসালামু আলাইকুম, স্মার্ট পস সফটওয়্যারের মাসিক সাবস্ক্রিপশন ফি পরিশোধ করার জন্য অনুরোধ করা যাচ্ছে। ধন্যবাদ!</textarea>
+            <textarea id="broadcastMsg" class="input-field" style="height: 100px; resize: none;" placeholder="মাসিক ফি পরিশোধ করার অনুরোধ করা যাচ্ছে।">আসসালামু আলাইকুম, স্মার্ট পস সফটওয়্যারের মাসিক সাবস্ক্রিপশন ফি পরিশোধ করার জন্য অনুরোধ করা যাচ্ছে। ধন্যবাদ!</textarea>
             
-            <button class="btn" style="background: var(--notice-bg); margin-top: 10px;" onclick="window.sendBroadcastSMS()">সবার ওয়ালে পাঠান</button>
+            <button class="btn" style="background: var(--notice-bg); margin-top: 10px;" onclick="window.sendBroadcastSMS()">সবার ওয়ালে পাঠান</button>
         </div>
     </div>
 
@@ -219,13 +249,13 @@
         <div class="modal-box">
             <button class="modal-close" onclick="document.getElementById('addShopModal').style.display='none'">✖</button>
             <h3>➕ নতুন দোকান অ্যাকাউন্ট</h3>
-            <p style="font-size: 13px; color: var(--warning); font-weight: 600; margin-bottom: 15px; text-align: center;">গ্রাহক পেমেন্ট করার পর অ্যাডমিন অ্যাপ্রুভ করলে মেয়াদ শুরু হবে।</p>
+            <p style="font-size: 13px; color: var(--warning); font-weight: 600; margin-bottom: 15px; text-align: center;">গ্রাহক পেমেন্ট করার পর অ্যাডমিন অ্যাপ্রুভ করলে মেয়াদ শুরু হবে।</p>
             
             <label class="form-label">দোকানের নাম</label>
             <input type="text" id="newShopName" class="input-field" placeholder="যেমন: বিসমিল্লাহ স্টোর">
             <label class="form-label">লগইন ইমেইল</label>
             <input type="email" id="newShopEmail" class="input-field" placeholder="shop@gmail.com">
-            <label class="form-label">লগইন পাসওয়ার্ড</label>
+            <label class="form-label">লগইন পাসওয়ার্ড</label>
             <input type="text" id="newShopPassword" class="input-field" placeholder="অন্তত ৬ অক্ষর">
             <label class="form-label">মোবাইল নম্বর</label>
             <input type="text" id="newShopPhone" class="input-field" placeholder="০১৭XXXXXXXX">
@@ -243,13 +273,13 @@
             
             <div class="detail-row"><span class="detail-label">লগইন ইমেইল:</span><span class="detail-value" id="det-email"></span></div>
             <div class="detail-row"><span class="detail-label">মোবাইল:</span><span class="detail-value" id="det-phone"></span></div>
-            <div class="detail-row"><span class="detail-label">বর্তমান মেয়াদ শেষ:</span><span class="detail-value" id="det-expire"></span></div>
+            <div class="detail-row"><span class="detail-label">বর্তমান মেয়াদ শেষ:</span><span class="detail-value" id="det-expire"></span></div>
             
             <div style="background: #f1f5f9; padding: 10px; border-radius: 8px; margin: 10px 0; border: 1px solid var(--border);">
                 <div style="font-size: 13px; color: var(--primary); font-weight: bold; margin-bottom: 8px; text-align: center; border-bottom: 1px dashed var(--border); padding-bottom: 5px;">পেমেন্ট সাবমিশন তথ্য</div>
                 <div class="detail-row"><span class="detail-label">পেমেন্ট মেথড:</span><span class="detail-value" id="det-pay-method" style="color:var(--text-main);"></span></div>
                 <div class="detail-row"><span class="detail-label">সেন্ডার নম্বর:</span><span class="detail-value" id="det-pay-num" style="color:var(--text-main);"></span></div>
-                <div class="detail-row"><span class="detail-label">কয় মাসের ফি:</span><span class="detail-value" id="det-pay-months" style="color:var(--success);"></span></div>
+                <div class="detail-row"><span class="detail-label">কয় মাসের ফি:</span><span class="detail-value" id="det-pay-months" style="color:var(--success);"></span></div>
                 <div class="detail-row"><span class="detail-label">TrxID:</span><span class="detail-value" id="det-trx" style="color:var(--danger); font-size: 15px;"></span></div>
             </div>
 
@@ -259,17 +289,18 @@
             <div style="margin-top: 15px;">
                 <label class="form-label" style="color: var(--primary); font-weight: 700; text-align: center; margin-bottom: 8px;">সাবস্ক্রিপশন প্যাকেজ সিলেক্ট করুন</label>
                 <div class="package-grid">
+                    <!-- ১২৫ টাকা চার্জ অনুযায়ী পরিবর্তন করা হয়েছে -->
                     <div class="package-card selected" onclick="window.selectPackage(1, this)">
                         <h4>১ মাস</h4>
-                        <p>১৫০ ৳</p>
+                        <p>১২৫ ৳</p>
                     </div>
                     <div class="package-card" onclick="window.selectPackage(6, this)">
                         <h4>৬ মাস</h4>
-                        <p>৯০০ ৳</p>
+                        <p>৭৫০ ৳</p>
                     </div>
                     <div class="package-card" onclick="window.selectPackage(12, this)">
                         <h4>১ বছর</h4>
-                        <p>১৮০০ ৳</p>
+                        <p>১৫০০ ৳</p>
                     </div>
                 </div>
                 <input type="hidden" id="selectedMonths" value="1">
@@ -319,7 +350,7 @@
         </div>
     </div>
 
-    <!-- ❓ সুন্দর কাস্টম কনফার্ম মোডাল (To Replace Ugly JS confirm) -->
+    <!-- ❓ সুন্দর কাস্টম কনফার্ম মোডাল -->
     <div class="modal-overlay top-tier" id="adminConfirmModal" style="z-index: 9999;">
         <div class="modal-box" style="padding: 30px 20px;">
             <div class="alert-icon" id="confirmIcon" style="color: var(--danger);">❓</div>
@@ -345,7 +376,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-auth.js";
-        import { getDatabase, ref, push, set, onValue, update, remove } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-database.js";
+        import { getDatabase, ref, push, set, onValue, update, remove, get } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAGdkgmzKG7lY9Y6BLfGyx0uB3qU3n_VAc",
@@ -424,7 +455,7 @@
                 await signInWithEmailAndPassword(auth, email, password);
                 btn.innerText = "লগইন করুন";
             } catch (error) {
-                window.showAlert("লগইন ফেইল", "ফায়ারবেস এরর: " + error.code);
+                window.showAlert("লগইন ফেইল", "ফায়ারবেস এরর: " + error.code);
                 btn.innerText = "লগইন করুন";
             }
         };
@@ -444,8 +475,8 @@
             const phone = document.getElementById('newShopPhone').value.trim();
             const btn = document.getElementById('saveShopBtn');
 
-            if(!name || !email || !password) { window.showAlert("তথ্য অসম্পূর্ণ", "নাম, ইমেইল এবং পাসওয়ার্ড দিতে হবে!"); return; }
-            if(password.length < 6) { window.showAlert("ত্রুটি", "পাসওয়ার্ড অন্তত ৬ অক্ষরের হতে হবে!"); return; }
+            if(!name || !email || !password) { window.showAlert("তথ্য অসম্পূর্ণ", "নাম, ইমেইল এবং পাসওয়ার্ড দিতে হবে!"); return; }
+            if(password.length < 6) { window.showAlert("ত্রুটি", "পাসওয়ার্ড অন্তত ৬ অক্ষরের হতে হবে!"); return; }
 
             btn.innerText = "অ্যাকাউন্ট তৈরি হচ্ছে...";
             try {
@@ -459,7 +490,7 @@
                     shopName: name, email: email, phone: phone, expireDate: "", paidMonths: 0, paymentStatus: 'pending', trxId: "", totalSales: 0, createdAt: new Date().toISOString()
                 });
                 
-                window.showAlert("সফল", "নতুন দোকান ও অ্যাকাউন্ট সফলভাবে তৈরি হয়েছে!");
+                window.showAlert("সফল", "নতুন দোকান ও অ্যাকাউন্ট সফলভাবে তৈরি হয়েছে!");
                 
                 document.getElementById('newShopName').value = ''; document.getElementById('newShopEmail').value = '';
                 document.getElementById('newShopPassword').value = ''; document.getElementById('newShopPhone').value = '';
@@ -467,11 +498,85 @@
                 document.getElementById('addShopModal').style.display='none';
             } catch (error) { 
                 let msg = error.message;
-                if(error.code === 'auth/email-already-in-use') msg = 'এই ইমেইল দিয়ে আগেই অ্যাকাউন্ট খোলা আছে!';
-                window.showAlert("সমস্যা হয়েছে", msg); 
+                if(error.code === 'auth/email-already-in-use') msg = 'এই ইমেইল দিয়ে আগেই অ্যাকাউন্ট খোলা আছে!';
+                window.showAlert("সমস্যা হয়েছে", msg); 
                 btn.innerText = "অ্যাকাউন্ট তৈরি করুন"; 
             }
         };
+
+        // ================== NEW GLOBAL PRODUCTS LOGIC ==================
+        window.openAddProductModal = () => {
+            document.getElementById('newProductNames').value = '';
+            document.getElementById('addProductModal').style.display = 'flex';
+        };
+
+        window.saveGlobalProducts = async () => {
+            const unit = document.getElementById('newProductUnit').value;
+            const text = document.getElementById('newProductNames').value;
+            const btn = document.getElementById('saveProductBtn');
+            
+            if(!text.trim()) { window.showAlert("খালি ইনপুট", "দয়া করে অন্তত একটি পণ্যের নাম লিখুন!"); return; }
+            
+            // স্প্লিট করে শুধু ইউনিক নামগুলো নেওয়া হচ্ছে (ফাঁকা লাইন বাদ দিয়ে)
+            let productList = [...new Set(text.split('\n').map(p => p.trim()).filter(p => p !== ''))];
+            
+            if(productList.length > 1000) {
+                window.showAlert("লিমিট ক্রস", "একসাথে ১০০০ এর বেশি পণ্য যুক্ত করা যাবে না!");
+                return;
+            }
+            if(productList.length === 0) return;
+
+            btn.innerText = "সেভ হচ্ছে, অপেক্ষা করুন...";
+            
+            try {
+                const prodRef = ref(db, 'globalProducts');
+                const snapshot = await get(prodRef);
+                
+                // ডেটাবেসে আগে থেকে থাকা পণ্যগুলোর লিস্ট (Duplicate Check)
+                let existingProducts = new Set();
+                if (snapshot.exists()) {
+                    snapshot.forEach(child => {
+                        existingProducts.add(child.val().name.toLowerCase());
+                    });
+                }
+                
+                let newAdds = 0;
+                let duplicates = 0;
+                const promises = [];
+                
+                productList.forEach(productName => {
+                    if(!existingProducts.has(productName.toLowerCase())) {
+                        const newProdRef = push(prodRef);
+                        promises.push(set(newProdRef, {
+                            name: productName,
+                            unit: unit,
+                            addedAt: new Date().toISOString(),
+                            searchKey: productName.toLowerCase() // সার্চ দ্রুত করার জন্য
+                        }));
+                        newAdds++;
+                    } else {
+                        duplicates++;
+                    }
+                });
+                
+                await Promise.all(promises); // সব পণ্য একসাথে পুশ হওয়া পর্যন্ত অপেক্ষা
+                
+                document.getElementById('addProductModal').style.display = 'none';
+                
+                let successMessage = `সফলভাবে ${toBengaliNum(newAdds)} টি নতুন পণ্য যুক্ত হয়েছে!`;
+                if(duplicates > 0) {
+                    successMessage += `\n(আগে থেকেই ডেটাবেসে ছিল ${toBengaliNum(duplicates)} টি, যা বাদ দেওয়া হয়েছে)`;
+                }
+                
+                window.showAlert("সফল", successMessage);
+                btn.innerText = "পণ্যগুলো সেভ করুন";
+
+            } catch (error) {
+                window.showAlert("ত্রুটি", "সার্ভার এরর: " + error.message);
+                btn.innerText = "পণ্যগুলো সেভ করুন";
+            }
+        };
+        // ================================================================
 
         window.loadShops = () => {
             const loader = document.getElementById('loader');
@@ -499,7 +604,6 @@
                         totalCount++;
                         const isExpired = data.expireDate && data.expireDate < today;
 
-                        // 인কাম ক্যালকুলেশন
                         totalIncomeMonths += parseInt(data.paidMonths || 0);
 
                         if (data.paymentStatus === 'review') {
@@ -527,8 +631,8 @@
                 document.getElementById('reviewCount').innerText = toBengaliNum(reviewCount);
                 document.getElementById('dueCount').innerText = toBengaliNum(dueCount);
                 
-                // ১৫০ টাকা মাসিক ফি হিসেবে মোট আয় 
-                document.getElementById('statIncome').innerText = toBengaliNum(totalIncomeMonths * 150) + " ৳";
+                // ১২৫ টাকা মাসিক ফি হিসেবে মোট আয় 
+                document.getElementById('statIncome').innerText = toBengaliNum(totalIncomeMonths * 125) + " ৳";
 
                 window.renderList(allShopsData);
             });
@@ -612,7 +716,6 @@
             document.getElementById('individualSMSModal').style.display = 'flex';
         };
 
-        // Changed to use Custom Confirm Modal
         window.triggerDeleteSupportTicket = (ticketId) => {
             window.showCustomConfirm(
                 "মেসেজ ডিলিট",
@@ -621,9 +724,9 @@
                 async () => {
                     try {
                         await remove(ref(db, 'supportTickets/' + ticketId));
-                        window.showAlert("সফল", "সাপোর্ট মেসেজটি ডিলিট করা হয়েছে।");
+                        window.showAlert("সফল", "সাপোর্ট মেসেজটি ডিলিট করা হয়েছে।");
                     } catch(error) {
-                        window.showAlert("ত্রুটি", "ডিলিট করতে সমস্যা হয়েছে: " + error.message);
+                        window.showAlert("ত্রুটি", "ডিলিট করতে সমস্যা হয়েছে: " + error.message);
                     }
                 }
             );
@@ -634,7 +737,7 @@
             container.innerHTML = '';
             
             if(dataArray.length === 0) {
-                container.innerHTML = `<div style="text-align:center; padding: 20px; color:gray; font-size: 14px; font-weight: 600;">কোনো গ্রাহক পাওয়া যায়নি।</div>`;
+                container.innerHTML = `<div style="text-align:center; padding: 20px; color:gray; font-size: 14px; font-weight: 600;">কোনো গ্রাহক পাওয়া যায়নি।</div>`;
                 return;
             }
 
@@ -647,9 +750,9 @@
                 if(data.paymentStatus === 'review') {
                     statusBadge = `<span class="badge-review">🔔 পেমেন্ট রিভিউ</span>`;
                 } else if(data.paymentStatus === 'pending' || !data.expireDate) {
-                    statusBadge = `<span class="badge-pending">অপেক্ষায় আছে</span>`;
+                    statusBadge = `<span class="badge-pending">অপেক্ষায় আছে</span>`;
                 } else if(isExpired) {
-                    statusBadge = `<span class="badge-expired">❌ মেয়াদ শেষ</span>`;
+                    statusBadge = `<span class="badge-expired">❌ মেয়াদ শেষ</span>`;
                 } else {
                     statusBadge = `<span class="badge-active">✅ অ্যাক্টিভ</span>`;
                 }
@@ -693,7 +796,7 @@
 
             document.getElementById('det-shopName').innerText = shop.shopName;
             document.getElementById('det-email').innerText = shop.email;
-            document.getElementById('det-phone').innerText = shop.phone || 'দেওয়া হয়নি';
+            document.getElementById('det-phone').innerText = shop.phone || 'দেওয়া হয়নি';
             
             document.getElementById('det-pay-method').innerText = shop.payMethod === 'bKash' ? 'বিকাশ' : (shop.payMethod === 'Nagad' ? 'নগদ' : '-');
             document.getElementById('det-pay-num').innerText = shop.sentNumber ? toBengaliNum(shop.sentNumber) : '-';
@@ -713,10 +816,10 @@
             const isExpired = shop.expireDate && shop.expireDate < today;
             
             if (!shop.expireDate) {
-                document.getElementById('det-expire').innerHTML = `<span style="color:gray;">এখনো শুরু হয়নি</span>`;
+                document.getElementById('det-expire').innerHTML = `<span style="color:gray;">এখনো শুরু হয়নি</span>`;
             } else {
                 document.getElementById('det-expire').innerHTML = isExpired ? 
-                    `<span style="color:var(--danger);">${shop.expireDate} (মেয়াদ শেষ)</span>` : 
+                    `<span style="color:var(--danger);">${shop.expireDate} (মেয়াদ শেষ)</span>` : 
                     `<span style="color:var(--success);">${shop.expireDate}</span>`;
             }
 
@@ -731,11 +834,11 @@
                 if(shop.paymentStatus === 'pending' || !shop.expireDate) {
                     badgeHtml = `<span class="badge-pending" style="font-size:14px; padding: 6px 15px;">পেমেন্ট বাকি / অপেক্ষমাণ</span>`;
                 } else if(isExpired) {
-                    badgeHtml = `<span class="badge-expired" style="font-size:14px; padding: 6px 15px;">❌ মেয়াদ শেষ হয়েছে</span>`;
+                    badgeHtml = `<span class="badge-expired" style="font-size:14px; padding: 6px 15px;">❌ মেয়াদ শেষ হয়েছে</span>`;
                 } else {
                     badgeHtml = `<span class="badge-active" style="font-size:14px; padding: 6px 15px;">✅ অ্যাকাউন্ট অ্যাক্টিভ</span>`;
                 }
-                approveBtn.innerHTML = `➕ ম্যানুয়ালি মেয়াদ বাড়ান`;
+                approveBtn.innerHTML = `➕ ম্যানুয়ালি মেয়াদ বাড়ান`;
                 approveBtn.style.background = 'var(--primary)';
             }
             
@@ -747,17 +850,16 @@
             document.getElementById('broadcastModal').style.display = 'flex';
         };
 
-        // Changed to use Custom Confirm Modal
         window.sendBroadcastSMS = () => {
             const baseMsg = document.getElementById('broadcastMsg').value.trim();
-            if(!baseMsg) { window.showAlert("খালি মেসেজ", "দয়া করে এসএমএস-এর বার্তা লিখুন!"); return; }
+            if(!baseMsg) { window.showAlert("খালি মেসেজ", "দয়া করে এসএমএস-এর বার্তা লিখুন!"); return; }
 
             window.showCustomConfirm(
                 "এসএমএস ব্রডকাস্ট",
-                "আপনি কি নিশ্চিত যে এই এসএমএসটি সকল দোকানদারের ওয়ালে পাঠাতে চান?",
+                "আপনি কি নিশ্চিত যে এই এসএমএসটি সকল দোকানদারের ওয়ালে পাঠাতে চান?",
                 "📢", "পাঠান", "var(--notice-bg)",
                 async () => {
-                    const finalMsg = baseMsg + "\n\n[বার্তাটি পাঠানো হয়েছে: " + new Date().toLocaleString('bn-BD') + "]";
+                    const finalMsg = baseMsg + "\n\n[বার্তাটি পাঠানো হয়েছে: " + new Date().toLocaleString('bn-BD') + "]";
                     try {
                         const noticeRef = ref(db, 'systemNotice');
                         await set(noticeRef, {
@@ -766,9 +868,9 @@
                         });
 
                         document.getElementById('broadcastModal').style.display = 'none';
-                        window.showAlert("সফল", "ইন্টারনাল এসএমএস সফলভাবে সকল গ্রাহকের ওয়ালে পাঠিয়ে দেওয়া হয়েছে!");
+                        window.showAlert("সফল", "ইন্টারনাল এসএমএস সফলভাবে সকল গ্রাহকের ওয়ালে পাঠিয়ে দেওয়া হয়েছে!");
                     } catch (error) {
-                        window.showAlert("ত্রুটি", "এসএমএস পাঠাতে সমস্যা হয়েছে: " + error.message);
+                        window.showAlert("ত্রুটি", "এসএমএস পাঠাতে সমস্যা হয়েছে: " + error.message);
                     }
                 }
             );
@@ -776,13 +878,13 @@
 
         window.openIndividualSMSModalFromDetails = () => {
             document.getElementById('smsTargetShop').innerText = `প্রাপক: ${activeShopNameForAction}`;
-            document.getElementById('individualMsg').value = `আসসালামু আলাইকুম ${activeShopNameForAction}, আপনার পস সফটওয়্যারের সাবস্ক্রিপশন ফি পরিশোধ করার জন্য অনুরোধ করা যাচ্ছে।`;
+            document.getElementById('individualMsg').value = `আসসালামু আলাইকুম ${activeShopNameForAction}, আপনার পস সফটওয়্যারের সাবস্ক্রিপশন ফি পরিশোধ করার জন্য অনুরোধ করা যাচ্ছে।`;
             document.getElementById('individualSMSModal').style.display = 'flex';
         };
 
         window.sendIndividualSMS = async () => {
             const msg = document.getElementById('individualMsg').value.trim();
-            if(!msg) { window.showAlert("খালি মেসেজ", "দয়া করে বার্তা লিখুন!"); return; }
+            if(!msg) { window.showAlert("খালি মেসেজ", "দয়া করে বার্তা লিখুন!"); return; }
 
             try {
                 const personalNoticeRef = ref(db, `shops/${activeShopIdForAction}/personalNotice`);
@@ -793,19 +895,18 @@
 
                 document.getElementById('individualSMSModal').style.display = 'none';
                 document.getElementById('shopDetailsModal').style.display = 'none';
-                window.showAlert("সফল", `${activeShopNameForAction}-এর ওয়ালে ব্যক্তিগত এসএমএস পাঠানো হয়েছে!`);
+                window.showAlert("সফল", `${activeShopNameForAction}-এর ওয়ালে ব্যক্তিগত এসএমএস পাঠানো হয়েছে!`);
             } catch (error) {
-                window.showAlert("ত্রুটি", "এসএমএস পাঠাতে সমস্যা হয়েছে: " + error.message);
+                window.showAlert("ত্রুটি", "এসএমএস পাঠাতে সমস্যা হয়েছে: " + error.message);
             }
         };
 
-        // Changed to use Custom Confirm Modal
         window.triggerApprovePaymentConfirm = () => {
             const monthsInput = parseInt(document.getElementById('selectedMonths').value) || 1;
             
             window.showCustomConfirm(
-                "মেয়াদ বৃদ্ধি",
-                `আপনি কি নিশ্চিত যে এই গ্রাহকের মেয়াদ আরও ${toBengaliNum(monthsInput)} মাস বাড়াতে চান?`,
+                "মেয়াদ বৃদ্ধি",
+                `আপনি কি নিশ্চিত যে এই গ্রাহকের মেয়াদ আরও ${toBengaliNum(monthsInput)} মাস বাড়াতে চান?`,
                 "✅", "অ্যাপ্রুভ", "var(--success)",
                 window.approvePayment
             );
@@ -842,7 +943,7 @@
                     payMonths: null 
                 });
                 
-                window.showAlert("সফল", `মেয়াদ সফলভাবে ${monthsInput} মাস বাড়িয়ে ${newExpireDate} পর্যন্ত করা হয়েছে!`); 
+                window.showAlert("সফল", `মেয়াদ সফলভাবে ${monthsInput} মাস বাড়িয়ে ${newExpireDate} পর্যন্ত করা হয়েছে!`); 
                 document.getElementById('shopDetailsModal').style.display = 'none';
             } catch (error) { window.showAlert("ত্রুটি", "আপডেট ফেইল: " + error.message); }
         };
@@ -861,7 +962,7 @@
             
             try {
                 await remove(ref(db, 'shops/' + activeShopIdForAction));
-                window.showAlert("সফল", "গ্রাহককে সফলভাবে সিস্টেম থেকে মুছে ফেলা হয়েছে!"); 
+                window.showAlert("সফল", "গ্রাহককে সফলভাবে সিস্টেম থেকে মুছে ফেলা হয়েছে!"); 
                 document.getElementById('pinModal').style.display = 'none';
                 document.getElementById('shopDetailsModal').style.display = 'none';
             } catch (error) {
